@@ -5,14 +5,12 @@ on:
     branches:
       - main
 
-
-
 jobs:
   build-deploy:
-    name: Build and Deploy Spring Boot for beginner
+    name: Build and Deploy Spring Boot for Beginners
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Setup JDK 17
@@ -20,30 +18,25 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: 17
+
       - name: Unit Test
         run: mvn -B test --file pom.xml
 
       - name: Build the application
         run: |
-          mvn clean
-          mvn -B package --file pom.xml
-      - name: Build Docker Image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          dockerfile: Dockerfile
-          push: false
-          tag: ${{ secrets.DOCKER_USERNAME }}/JavaPractice:latest
+          mvn clean package --file pom.xml
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME}}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Push to Docker Hub
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v2
         with:
           context: .
-          dockerfile: Dockerfile
+          file: Dockerfile
           push: true
-          tag: ${{ secrets.DOCKER_USERNAME }}/JavaPractice:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/javapractice:latest
+
